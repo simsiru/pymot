@@ -15,4 +15,4 @@ license = {file = "LICENSE"}
 dynamic = ["version", "description"]
 
 [project.urls]
-Source = "https://github.com/simsiru/py-calculator"
+Source = "https://github.com/simsiru/pymot"

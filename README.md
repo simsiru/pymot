@@ -1,20 +1,16 @@
-# Calculator
+# Multi object tracking class
 
-> Perform basic math operations with internal memory
+> Perform multi object tracking and use a custom function for tracked objects
 
-Calculator methods:
+MOT methods:
 
--   _add_ - add a real number to the internal memory value
--   _subtract_ - subtract a real number from the internal memory value
--   _multiply_ - multiply the internal memory value by a real number
--   _divide_ - divide the internal memory value by a real number
--   _root_ - take (n) root of the internal memory value
--   _reset_ - reset the internal memory value
+-   _detect_objects_ - detect object from a frame
+-   _track_objects_ - perform a tracking update on frame
 
 ## Installation
 
 ```sh
-pip install pycalc3
+pip install pymot
 ```
 
 ## Usage
@@ -42,7 +38,7 @@ pip install pycalc3
 0.0
 ```
 
-## [Changelog](https://github.com/simsiru/py-calculator/CHANGELOG.md)
+## [Changelog](https://github.com/simsiru/pymot/blob/main/CHANGELOG.md)
 
 ## License
 
