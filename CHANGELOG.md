@@ -1,3 +1,9 @@
+# 0.0.3 (2022-08-07)
+
+### Features
+
+-   ckpt.t7 file path fix
+
 # 0.0.2 (2022-08-07)
 
 ### Features

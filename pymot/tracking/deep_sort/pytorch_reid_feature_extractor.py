@@ -5,12 +5,7 @@ import torchvision.transforms as transforms
 import numpy as np
 import cv2
 
-# import logging
-
-
-# from fastreid.config import get_cfg
-# from fastreid.engine import DefaultTrainer
-# from fastreid.utils.checkpoint import Checkpointer
+import pkg_resources
 
 
 class BasicBlock(nn.Module):
@@ -177,6 +172,10 @@ class Extractor(object):
         self.net = Net(reid=True)
         self.device = (
             "cuda" if torch.cuda.is_available() and use_cuda else "cpu"
+        )
+        model_path = pkg_resources.resource_filename(
+            'pymot.tracking.deep_sort',
+            'ckpt.t7'
         )
         state_dict = torch.load(
             model_path, map_location=lambda storage, loc: storage

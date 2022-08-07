@@ -5,3 +5,4 @@ pymot/tracking/deep_sort/__pycache__/
 .mypy_cache/
 .tox/
 .coverage
+dist/
