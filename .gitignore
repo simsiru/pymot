@@ -1,4 +1,4 @@
 pymot/__pycache__/
-object_detection/__pycache__/
-tracking/__pycache__/
-tracking/deep_sort/__pycache__/
+pymot/object_detection/__pycache__/
+pymot/tracking/__pycache__/
+pymot/tracking/deep_sort/__pycache__/

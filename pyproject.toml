@@ -13,6 +13,10 @@ classifiers = [
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
 dynamic = ["version", "description"]
+dependencies = [
+    "numpy >=1.22.0",
+    "scipy >=1.8.0",
+]
 
 [project.urls]
 Source = "https://github.com/simsiru/pymot"

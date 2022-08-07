@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
-from tracking.deep_sort import nn_matching
-from tracking.deep_sort.detection import Detection
-from tracking.deep_sort.tracker import Tracker
-from tracking.deep_sort.pytorch_reid_feature_extractor\
+from pymot.tracking.deep_sort import nn_matching
+from pymot.tracking.deep_sort.detection import Detection
+from pymot.tracking.deep_sort.tracker import Tracker
+from pymot.tracking.deep_sort.pytorch_reid_feature_extractor\
      import Extractor, get_features
-from object_detection import yolo
+from pymot.object_detection import yolo
 from utils import draw_bbox_tracking
 from collections import Callable
 

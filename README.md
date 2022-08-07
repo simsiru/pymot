@@ -30,10 +30,26 @@ mot_cfg = {
 
 MOT methods:
 
--   _detect_objects_ - detect object from a frame
--   _track_objects_ - perform a tracking update on frame
+- _detect_objects_ - detect object from a frame
+- _track_objects_ - perform a tracking update on frame
+
+## Algorithms
+
+Currently available object detection algorithms:
+        
+- YOLOv3
+- YOLOv4
+        
+Currently available tracking algorithms:
+        
+- DeepSORT
 
 ## Installation
+
+To use the package torch, torchvision and opencv must be also installed.
+
+Note: It is recommended to use opencv compiled with CUDA support, because algorithms that use opencv's darknet
+backend like YOLOv3/v4 run an order of magnitude faster on a GPU.
 
 ```sh
 pip install pymot
