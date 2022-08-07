@@ -2,3 +2,6 @@ pymot/__pycache__/
 pymot/object_detection/__pycache__/
 pymot/tracking/__pycache__/
 pymot/tracking/deep_sort/__pycache__/
+.mypy_cache/
+.tox/
+.coverage

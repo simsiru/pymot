@@ -3,11 +3,11 @@
 
 class TrackState:
     """
-    Enumeration type for the single target track state. Newly created tracks are
-    classified as `tentative` until enough evidence has been collected. Then,
-    the track state is changed to `confirmed`. Tracks that are no longer alive
-    are classified as `deleted` to mark them for removal from the set of active
-    tracks.
+    Enumeration type for the single target track state. Newly created
+    tracks are classified as `tentative` until enough evidence has
+    been collected. Then, the track state is changed to `confirmed`.
+    Tracks that are no longer alive are classified as `deleted` to
+    mark them for removal from the set of active tracks.
     """
 
     Tentative = 1
@@ -36,8 +36,8 @@ class Track:
         The maximum number of consecutive misses before the track state is
         set to `Deleted`.
     feature : Optional[ndarray]
-        Feature vector of the detection this track originates from. If not None,
-        this feature is added to the `features` cache.
+        Feature vector of the detection this track originates from. If not
+        None, this feature is added to the `features` cache.
     Attributes
     ----------
     mean : ndarray
@@ -55,12 +55,20 @@ class Track:
     state : TrackState
         The current track state.
     features : List[ndarray]
-        A cache of features. On each measurement update, the associated feature
-        vector is added to this list.
+        A cache of features. On each measurement update, the associated
+        feature vector is added to this list.
     """
 
-    def __init__(self, mean, covariance, track_id, n_init, max_age,
-                 feature=None, class_name=None):
+    def __init__(
+        self,
+        mean,
+        covariance,
+        track_id,
+        n_init,
+        max_age,
+        feature=None,
+        class_name=None,
+    ):
         self.mean = mean
         self.covariance = covariance
         self.track_id = track_id
@@ -78,8 +86,8 @@ class Track:
         self.class_name = class_name
 
     def to_tlwh(self):
-        """Get current position in bounding box format `(top left x, top left y,
-        width, height)`.
+        """Get current position in bounding box format
+        `(top left x, top left y, width, height)`.
         Returns
         -------
         ndarray
@@ -91,8 +99,8 @@ class Track:
         return ret
 
     def to_tlbr(self):
-        """Get current position in bounding box format `(min x, miny, max x,
-        max y)`.
+        """Get current position in bounding box format
+        `(min x, miny, max x, max y)`.
         Returns
         -------
         ndarray
@@ -101,7 +109,7 @@ class Track:
         ret = self.to_tlwh()
         ret[2:] = ret[:2] + ret[2:]
         return ret
-    
+
     def get_class(self):
         return self.class_name
 
@@ -118,8 +126,8 @@ class Track:
         self.time_since_update += 1
 
     def update(self, kf, detection):
-        """Perform Kalman filter measurement update step and update the feature
-        cache.
+        """Perform Kalman filter measurement update step and update the
+        feature cache.
         Parameters
         ----------
         kf : kalman_filter.KalmanFilter
@@ -128,7 +136,8 @@ class Track:
             The associated detection.
         """
         self.mean, self.covariance = kf.update(
-            self.mean, self.covariance, detection.to_xyah())
+            self.mean, self.covariance, detection.to_xyah()
+        )
         self.features.append(detection.feature)
 
         self.hits += 1
@@ -137,7 +146,8 @@ class Track:
             self.state = TrackState.Confirmed
 
     def mark_missed(self):
-        """Mark this track as missed (no association at the current time step).
+        """Mark this track as missed
+        (no association at the current time step).
         """
         if self.state == TrackState.Tentative:
             self.state = TrackState.Deleted
@@ -145,8 +155,7 @@ class Track:
             self.state = TrackState.Deleted
 
     def is_tentative(self):
-        """Returns True if this track is tentative (unconfirmed).
-        """
+        """Returns True if this track is tentative (unconfirmed)."""
         return self.state == TrackState.Tentative
 
     def is_confirmed(self):

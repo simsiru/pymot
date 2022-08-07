@@ -35,7 +35,8 @@ class Detection(object):
         return self.class_name
 
     def to_tlbr(self):
-        """Convert bounding box to format `(min x, min y, max x, max y)`, i.e.,
+        """Convert bounding box to format
+        `(min x, min y, max x, max y)`, i.e.,
         `(top left, bottom right)`.
         """
         ret = self.tlwh.copy()

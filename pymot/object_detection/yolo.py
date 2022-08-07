@@ -1,11 +1,19 @@
+"""Module for YOLO algorithms"""
+
 import cv2
 import numpy as np
 
 
 class YOLO:
-    def __init__(self, weights_path: str, cfg_path: str,
-    nms_thr: float=0.4, conf_thr: float=0.5,
-    img_size: float=416, enable_cuda: float=True) -> None:
+    def __init__(
+        self,
+        weights_path: str,
+        cfg_path: str,
+        nms_thr: float = 0.4,
+        conf_thr: float = 0.5,
+        img_size: float = 416,
+        enable_cuda: float = True,
+    ) -> None:
 
         self.nmsThreshold = nms_thr
         self.confThreshold = conf_thr
@@ -19,10 +27,13 @@ class YOLO:
 
         self.model = cv2.dnn_DetectionModel(net)
 
-        self.model.setInputParams(size=(self.image_size, self.image_size),
-        scale=1/255)
+        self.model.setInputParams(
+            size=(self.image_size, self.image_size), scale=1 / 255
+        )
 
     def detect(self, frame: np.ndarray):
-        return self.model.detect(frame, nmsThreshold=self.nmsThreshold,
-        confThreshold=self.confThreshold)
-
+        return self.model.detect(
+            frame,
+            nmsThreshold=self.nmsThreshold,
+            confThreshold=self.confThreshold,
+        )

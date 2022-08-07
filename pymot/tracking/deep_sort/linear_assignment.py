@@ -1,28 +1,36 @@
 # vim: expandtab:ts=4:sw=4
 from __future__ import absolute_import
 import numpy as np
-#from sklearn.utils.linear_assignment_ import linear_assignment
-#from sklearn_linear_assignment import linear_assignment
+
+# from sklearn.utils.linear_assignment_ import linear_assignment
+# from sklearn_linear_assignment import linear_assignment
 from . import kalman_filter
 
 import warnings
 
-INFTY_COST = 1e+5
+INFTY_COST = 1e5
 
 
 def min_cost_matching(
-        distance_metric, max_distance, tracks, detections, track_indices=None,
-        detection_indices=None):
+    distance_metric,
+    max_distance,
+    tracks,
+    detections,
+    track_indices=None,
+    detection_indices=None,
+):
     """Solve linear assignment problem.
 
     Parameters
     ----------
-    distance_metric : Callable[List[Track], List[Detection], List[int], List[int]) -> ndarray
-        The distance metric is given a list of tracks and detections as well as
-        a list of N track indices and M detection indices. The metric should
-        return the NxM dimensional cost matrix, where element (i, j) is the
-        association cost between the i-th track in the given track indices and
-        the j-th detection in the given detection_indices.
+    distance_metric : Callable[List[Track], List[Detection],
+    List[int], List[int]) -> ndarray
+        The distance metric is given a list of tracks and detections as well
+        as a list of N track indices and M detection indices. The metric
+        should return the NxM dimensional cost matrix, where element
+        (i, j) is the association cost between the i-th track in the
+        given track indices and the j-th detection in the given
+        detection_indices.
     max_distance : float
         Gating threshold. Associations with cost larger than this value are
         disregarded.
@@ -55,7 +63,8 @@ def min_cost_matching(
         return [], track_indices, detection_indices  # Nothing to match.
 
     cost_matrix = distance_metric(
-        tracks, detections, track_indices, detection_indices)
+        tracks, detections, track_indices, detection_indices
+    )
     cost_matrix[cost_matrix > max_distance] = max_distance + 1e-5
     indices = linear_assignment(cost_matrix)
 
@@ -78,18 +87,26 @@ def min_cost_matching(
 
 
 def matching_cascade(
-        distance_metric, max_distance, cascade_depth, tracks, detections,
-        track_indices=None, detection_indices=None):
+    distance_metric,
+    max_distance,
+    cascade_depth,
+    tracks,
+    detections,
+    track_indices=None,
+    detection_indices=None,
+):
     """Run matching cascade.
 
     Parameters
     ----------
-    distance_metric : Callable[List[Track], List[Detection], List[int], List[int]) -> ndarray
-        The distance metric is given a list of tracks and detections as well as
-        a list of N track indices and M detection indices. The metric should
-        return the NxM dimensional cost matrix, where element (i, j) is the
-        association cost between the i-th track in the given track indices and
-        the j-th detection in the given detection indices.
+    distance_metric : Callable[List[Track], List[Detection],
+    List[int], List[int]) -> ndarray
+        The distance metric is given a list of tracks and detections
+        as well as a list of N track indices and M detection indices.
+        The metric should return the NxM dimensional cost matrix,
+        where element (i, j) is the association cost between the i-th
+        track in the given track indices and the j-th detection in the
+        given detection indices.
     max_distance : float
         Gating threshold. Associations with cost larger than this value are
         disregarded.
@@ -128,24 +145,36 @@ def matching_cascade(
             break
 
         track_indices_l = [
-            k for k in track_indices
+            k
+            for k in track_indices
             if tracks[k].time_since_update == 1 + level
         ]
         if len(track_indices_l) == 0:  # Nothing to match at this level
             continue
 
-        matches_l, _, unmatched_detections = \
-            min_cost_matching(
-                distance_metric, max_distance, tracks, detections,
-                track_indices_l, unmatched_detections)
+        matches_l, _, unmatched_detections = min_cost_matching(
+            distance_metric,
+            max_distance,
+            tracks,
+            detections,
+            track_indices_l,
+            unmatched_detections,
+        )
         matches += matches_l
     unmatched_tracks = list(set(track_indices) - set(k for k, _ in matches))
     return matches, unmatched_tracks, unmatched_detections
 
 
 def gate_cost_matrix(
-        kf, cost_matrix, tracks, detections, track_indices, detection_indices,
-        gated_cost=INFTY_COST, only_position=False):
+    kf,
+    cost_matrix,
+    tracks,
+    detections,
+    track_indices,
+    detection_indices,
+    gated_cost=INFTY_COST,
+    only_position=False,
+):
     """Invalidate infeasible entries in cost matrix based on the state
     distributions obtained by Kalman filtering.
 
@@ -153,10 +182,10 @@ def gate_cost_matrix(
     ----------
     kf : The Kalman filter.
     cost_matrix : ndarray
-        The NxM dimensional cost matrix, where N is the number of track indices
-        and M is the number of detection indices, such that entry (i, j) is the
-        association cost between `tracks[track_indices[i]]` and
-        `detections[detection_indices[j]]`.
+        The NxM dimensional cost matrix, where N is the number of track
+        indices and M is the number of detection indices, such that
+        entry (i, j) is the association cost between
+        `tracks[track_indices[i]]` and `detections[detection_indices[j]]`.
     tracks : List[track.Track]
         A list of predicted tracks at the current time step.
     detections : List[detection.Detection]
@@ -168,11 +197,11 @@ def gate_cost_matrix(
         List of detection indices that maps columns in `cost_matrix` to
         detections in `detections` (see description above).
     gated_cost : Optional[float]
-        Entries in the cost matrix corresponding to infeasible associations are
-        set this value. Defaults to a very large value.
+        Entries in the cost matrix corresponding to infeasible
+        associations are set this value. Defaults to a very large value.
     only_position : Optional[bool]
-        If True, only the x, y position of the state distribution is considered
-        during gating. Defaults to False.
+        If True, only the x, y position of the state distribution is
+        considered during gating. Defaults to False.
 
     Returns
     -------
@@ -183,28 +212,15 @@ def gate_cost_matrix(
     gating_dim = 2 if only_position else 4
     gating_threshold = kalman_filter.chi2inv95[gating_dim]
     measurements = np.asarray(
-        [detections[i].to_xyah() for i in detection_indices])
+        [detections[i].to_xyah() for i in detection_indices]
+    )
     for row, track_idx in enumerate(track_indices):
         track = tracks[track_idx]
         gating_distance = kf.gating_distance(
-            track.mean, track.covariance, measurements, only_position)
+            track.mean, track.covariance, measurements, only_position
+        )
         cost_matrix[row, gating_distance > gating_threshold] = gated_cost
     return cost_matrix
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def linear_assignment(X):
@@ -257,7 +273,7 @@ class _HungarianState:
         # will not be able to work correctly. Therefore, we
         # transpose the cost function when needed. Just have to
         # remember to swap the result columns back later.
-        transposed = (cost_matrix.shape[1] < cost_matrix.shape[0])
+        transposed = cost_matrix.shape[1] < cost_matrix.shape[0]
         if transposed:
             self.C = (cost_matrix.T).copy()
         else:
@@ -297,7 +313,8 @@ def _hungarian(cost_matrix):
         "The linear_assignment function is deprecated in 0.21 "
         "and will be removed from 0.23. Use "
         "scipy.optimize.linear_sum_assignment instead.",
-        FutureWarning)
+        FutureWarning,
+    )
 
     state = _HungarianState(cost_matrix)
 
@@ -321,6 +338,7 @@ def _hungarian(cost_matrix):
 
 # Individual steps of the algorithm follow, as a state machine: they return
 # the next step to be taken (function to be called), if any.
+
 
 def _step1(state):
     """Steps 1 and 2 in the Wikipedia page."""
@@ -347,7 +365,7 @@ def _step3(state):
     the starred zeros describe a complete set of unique assignments.
     In this case, Go to DONE, otherwise, Go to Step 4.
     """
-    marked = (state.marked == 1)
+    marked = state.marked == 1
     state.col_uncovered[np.any(marked, axis=0)] = False
 
     if marked.sum() < state.C.shape[0]:
@@ -387,7 +405,8 @@ def _step4(state):
                 state.row_uncovered[row] = False
                 state.col_uncovered[col] = True
                 covered_C[:, col] = C[:, col] * (
-                    state.row_uncovered.astype(dtype=np.int, copy=False))
+                    state.row_uncovered.astype(dtype=np.int, copy=False)
+                )
                 covered_C[row] = 0
 
 
