@@ -10,8 +10,7 @@ from pymot.tracking.deep_sort.pytorch_reid_feature_extractor import (
     get_features,
 )
 from pymot.object_detection import yolo
-from utils import draw_bbox_tracking
-from collections import Callable
+from pymot.utils import draw_bbox_tracking
 
 
 class MOT:
@@ -23,7 +22,7 @@ class MOT:
         Multi object tracker configuration (template below).
 
         mot_cfg = {
-           'od_classes':'SPECIFY', # Object detection algorithm classes
+           'od_classes':'SPECIFY', # Object detection algorithm classes path
            'od_algo':'yolo',
            'od_wpath':'SPECIFY',   # Object detection algorithm weights path
            'od_cpath':'SPECIFY',   # Object detection algorithm config path
@@ -31,7 +30,7 @@ class MOT:
            'od_conf_thr':0.5,
            'od_img_size':416,
            'od_cuda':True,
-           't_classes':'SPECIFY',  # Classes to track
+           't_classes':'SPECIFY',  # List of classes to track
            't_algo':'deepsort',
            't_cuda':True,
            't_metric':'cosine',
@@ -44,7 +43,8 @@ class MOT:
     """
 
     def __init__(self, mot_cfg: dict) -> None:
-        self.od_classes = mot_cfg["od_classes"]
+        with open(mot_cfg["od_classes"]) as f:
+            self.od_classes = f.read().split('\n')
 
         self.track_classes = mot_cfg["t_classes"]
 
@@ -109,7 +109,7 @@ class MOT:
     def track_objects(
         self,
         frame: np.ndarray,
-        processing_func: Callable = None,
+        processing_func=None,
         **proc_kwargs
     ) -> tuple[dict, np.ndarray, dict]:
         """Detect objects in a frame using an object detection algorithm.

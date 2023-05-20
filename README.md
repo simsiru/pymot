@@ -8,24 +8,24 @@ MOT arguments:
 
 ```python
 mot_cfg = {
-           'od_classes':'SPECIFY',       # Object detection algorithm classes
-           'od_algo':'yolo',
-           'od_wpath':'SPECIFY',         # Object detection algorithm weights path
-           'od_cpath':'SPECIFY',         # Object detection algorithm config path
-           'od_nms_thr':0.4,
-           'od_conf_thr':0.5,
-           'od_img_size':416,
-           'od_cuda':True,
-           't_classes':'SPECIFY',        # Classes to track
-           't_algo':'deepsort',
-           't_cuda':True,
-           't_metric':'cosine',
-           't_max_cosine_distance':0.2,
-           't_budget':100,
-           't_max_iou_distance':0.7,
-           't_max_age':70,
-           't_n_init':3
-        }
+    'od_classes':'SPECIFY',       # Object detection algorithm classes path
+    'od_algo':'yolo',
+    'od_wpath':'SPECIFY',         # Object detection algorithm weights path
+    'od_cpath':'SPECIFY',         # Object detection algorithm config path
+    'od_nms_thr':0.4,
+    'od_conf_thr':0.5,
+    'od_img_size':416,
+    'od_cuda':True,
+    't_classes':'SPECIFY',        # List of classes to track
+    't_algo':'deepsort',
+    't_cuda':True,
+    't_metric':'cosine',
+    't_max_cosine_distance':0.2,
+    't_budget':100,
+    't_max_iou_distance':0.7,
+    't_max_age':70,
+    't_n_init':3
+}
 ```
 
 MOT methods:
@@ -77,7 +77,7 @@ while True:
         cv2.destroyAllWindows()
         break
 
-    tracked_ojb_info, frame_with_bboxes, _ = obj_tracking.track_objects(frame)
+    tracked_ojb_info, frame_with_bboxes, _ = mot_tracker.track_objects(frame)
 
     cv2.imshow('Object tracking with deepSORT', frame_with_bboxes)
 ```
@@ -93,12 +93,17 @@ mot_tracker = MOT(mot_cfg)
 cap = cv2.VideoCapture(0)
 
 
-def custom_processing_function(frame, tracking_id, obj_coord, **proc_kwargs) -> tuple[dict, tuple]:
+def custom_processing_function(
+        frame, 
+        tracking_id, 
+        obj_coord, 
+        **proc_kwargs
+    ) -> tuple[tuple, tuple]:
     xmin, ymin, xmax, ymax = obj_coord
 
     # If number of processed objects is more than max limit,
     # delete the first to enter.
-    if len(proc_kwargs['proc_obj_info']) > proc_kwargs['max_n_obj']:
+    if len(proc_kwargs['proc_obj_info'])>proc_kwargs['max_n_obj']:
         if proc_kwargs['last_obj_to_del'] not in proc_kwargs['proc_obj_info']:
             proc_kwargs['last_obj_to_del'] += 1
         else:
@@ -110,7 +115,7 @@ def custom_processing_function(frame, tracking_id, obj_coord, **proc_kwargs) -> 
         proc_kwargs['last_obj_to_del'] = tracking_id
 
     # If new tracking id, create new entry in the processed objects dict.
-    if tracking_id > proc_kwargs['prev_id']:
+    if tracking_id>proc_kwargs['prev_id']:
         proc_kwargs['prev_id'] = tracking_id
         proc_kwargs['proc_obj_info'][tracking_id] = [1, [], [], False]
         # Processing object information dict list element meaning:
@@ -121,7 +126,7 @@ def custom_processing_function(frame, tracking_id, obj_coord, **proc_kwargs) -> 
 
     # If the number of performed processings on a object with a certain
     # tracking id is less than needed, do another processing.
-    if proc_kwargs['proc_obj_info'][tracking_id][0] <= proc_kwargs['n_det']:
+    if proc_kwargs['proc_obj_info'][tracking_id][0]<=proc_kwargs['n_det']:
 
         # DO SOMETHING
 
@@ -132,22 +137,33 @@ def custom_processing_function(frame, tracking_id, obj_coord, **proc_kwargs) -> 
 
         proc_kwargs['proc_obj_info'][tracking_id][2] \
             = proc_kwargs['proc_animation'][idx - 1 \
-                if idx == len(proc_kwargs['proc_animation']) else idx]
+                if idx==len(proc_kwargs['proc_animation']) else idx]
 
         proc_kwargs['proc_obj_info'][tracking_id][0] += 1
 
     # If the number of performed processings on a object with a certain
     # tracking id has sufficed do final processing.
-    if proc_kwargs['proc_obj_info'][tracking_id][0] == proc_kwargs['n_det'] + 1:
+    if proc_kwargs['proc_obj_info'][tracking_id][0]==proc_kwargs['n_det']+1:
 
         # DO SOMETHING
 
         proc_kwargs['proc_obj_info'][tracking_id][0] += 1
 
-    return ((proc_kwargs['proc_obj_info'], proc_kwargs['last_obj_to_del'], proc_kwargs['prev_id']),
-    (False, proc_kwargs['proc_obj_info'][tracking_id][3],
-    ((0,255,0),(0,0,255)),
-    proc_kwargs['proc_obj_info'][tracking_id][2]))
+    output = (
+        (
+            proc_kwargs['proc_obj_info'], 
+            proc_kwargs['last_obj_to_del'], 
+            proc_kwargs['prev_id']
+        ),
+        (
+            False, 
+            proc_kwargs['proc_obj_info'][tracking_id][3],
+            ((0,255,0),(0,0,255)),
+            proc_kwargs['proc_obj_info'][tracking_id][2]
+        )
+    )
+
+    return output
 
 
 prev_id = -1
@@ -155,14 +171,7 @@ n_det = 10
 max_n_obj = 50
 last_obj_to_del = 0
 proc_obj_info = {}
-proc_animation = {0: "|",
-                  1: "|"*2,
-                  2: "|"*3,
-                  3: "|"*4,
-                  4: "|"*5,
-                  5: "|"*6,
-                  6: "|"*7,
-                  7: "|"*8,}
+proc_animation = {i:'|'*(i+1) for i in range(8)}
 
 while True:
     ret, frame = cap.read()
@@ -174,15 +183,16 @@ while True:
         cv2.destroyAllWindows()
         break
 
-    output = obj_tracking.track_objects(frame,
-                                        custom_processing_function,
-                                        prev_id = prev_id,
-                                        n_det = n_det,
-                                        max_n_obj = max_n_obj,
-                                        last_obj_to_del = last_obj_to_del,
-                                        proc_animation = proc_animation,
-                                        # Custom kwargs
-                                        )
+    output = mot_tracker.track_objects(
+        frame,
+        custom_processing_function,
+        prev_id=prev_id,
+        n_det=n_det,
+        max_n_obj=max_n_obj,
+        last_obj_to_del=last_obj_to_del,
+        proc_animation=proc_animation,
+        # Custom kwargs
+    )
 
     tracked_ojb_info, frame_with_bboxes, proc_obj_info_tuple = output
 
