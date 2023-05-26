@@ -57,7 +57,8 @@ pip install pymot
 
 ## Usage
 
-Without a custom function for tracked objects
+<details>
+<summary>Without a custom function for tracked objects</summary>
 
 ```python
 from pymot.mot import MOT
@@ -82,7 +83,11 @@ while True:
     cv2.imshow('Object tracking with deepSORT', frame_with_bboxes)
 ```
 
-With a custom function for tracked objects
+</details>
+
+
+<details>
+<summary>With a custom function for tracked objects</summary>
 
 ```python
 from pymot.mot import MOT
@@ -201,6 +206,8 @@ while True:
 
     cv2.imshow('Object tracking with deepSORT', frame_with_bboxes)
 ```
+
+</details>
 
 ## [Changelog](https://github.com/simsiru/pymot/blob/main/CHANGELOG.md)
 
